@@ -25,9 +25,8 @@ w_d = input.w_d;
 w_h = input.w_h;
 w_ax = input.w_ax;
 omega_bi_m = [0;0;1];
-mu = 4.9048695*10^12;
+mu =  4.9048695*10^12;
 tau_r = simpar.general.tau_r;
-tau_ax = simpar.general.tau_ax;
 d_g = simpar.general.d_g;
 d_h = simpar>general.d_h;
 
@@ -43,9 +42,7 @@ accl_bias = x(simpar.states.ix.b_accl);
 %% Compute individual elements of x_dot
 r_dot = v;
 accel_grav = -mu/norm(r)^3 * r;
-%%%%%Fix this
-accel_thrust = guidance();
-%%%%%
+%accel_thrust = guidance();
 v_dot = accel_grav + accel_thrust + g_bias + w_a;
 
 q_im_dot = 1/2*qmult([0;omega_bi_m],q_im);
@@ -62,12 +59,5 @@ h_dot = norm(v_perp)/d_h*height + w_h;
 b_ax_dot = -1/tau_ax*accl_bias + w;
 
 %% Assign to output
-xdot = [r_dot;...
-        v_dot;...
-        q_im_dot;...
-        q_bc_dot;...
-        b_r_dot;...
-        gbias_dot;...
-        h_dot;...
-        b_ax_dot];
+xdot = [r_dot; v_dot; q_im_dot; q_bc_dot; b_r_dot; gbias_dot; h_dot; b_ax_dot];
 end

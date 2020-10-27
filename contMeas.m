@@ -1,4 +1,4 @@
-function [ ytilde ] = contMeas( )
+function [ ytilde ] = contMeas(x, a_thr,  w_a, simpar)
 %contInertialMeas synthesizes noise measurements used to propagate the
 %navigation state
 %
@@ -18,4 +18,12 @@ function [ ytilde ] = contMeas( )
 % Reference: 
 % Copyright 2020 Utah State University
 
+%% Prelim
+b_a = x(simpar.states.ix.abias);
+
+%% Calculate vehicle attitude assuming y = -n_v;
+T_i2b = calc_attitude( x, simpar );
+
+%% Compute accelorometer measurements
+ytilde = T_i2b + (a_thr + w_a) + b_a + eta_a;
 end

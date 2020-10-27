@@ -1,4 +1,4 @@
-function [ P_dot ] = navCov_de( P, input )
+ function [ P_dot ] = navCov_de( P, input )
 %navCov_de computes the derivative of the nav state covariance
 %
 % Inputs:
