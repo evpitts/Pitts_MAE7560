@@ -10,7 +10,7 @@ t = (0:nstep-1)'*simpar.general.dt;
 t_kalman = (0:nstep_aid)'.*simpar.general.dt_kalmanUpdate;
 nstep_aid = length(t_kalman);
 %Acceleration due to moon gravity
-r_i_reference = [0, simpar.general.R_M]';
+r_i_reference = [0, 0, simpar.general.R_M]';
 a_grav = -simpar.general.MU/norm(r_i_reference)^3*r_i_reference;
 %If you are computing the nominal star tracker or other sensor orientations
 %below is an example of one way to do this
@@ -46,7 +46,7 @@ disp('x_buff')
 disp(x_buff(:,1))
 %% Initialize the navigation state vector
 %Should be (x_buff,simpar)
-xhat_buff(:,1) = initialize_nav_state(x_buff(:,1),eye(6),simpar);
+xhat_buff(:,1) = initialize_nav_state(x_buff(:,1),simpar);
 disp('xhat_buff')
 disp(xhat_buff(:,1))
 % %% Synthasize terrain and gravity error
@@ -61,7 +61,8 @@ a_thr(:,1) = guidance(x_buff(simpar.states.ix.pos,1),...
     x_buff(simpar.states.ix.vel,1),...
     [simpar.general.astar_x_tf, simpar.general.astar_y_tf, simpar.general.astar_x_tf]',...
     [simpar.general.vstar_x_tf, simpar.general.vstar_y_tf, simpar.general.vstar_z_tf]',...
-    [simpar.general.rstar_x_tf, 4, 1]',simpar.general.tsim,...
+    [simpar.general.rstar_x_tf, simpar.general.rstar_y_tf, simpar.general.rstar_z_tf]',...
+    simpar.general.tsim,...
     a_grav, 'apollo');
 % Synthesize continuous sensor data at t_n-1
 % ytilde_buff(:,1) = contMeas();

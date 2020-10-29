@@ -1,4 +1,4 @@
-function [ xhat ] = initialize_nav_state( x, P, simpar)
+function [ xhat ] = initialize_nav_state( x, simpar)
 %initialize_nav_state initializes the navigation state vector consistent
 %with the initial covariance matrix
 %
