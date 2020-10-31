@@ -18,9 +18,6 @@ function xdot = truthState_de(x, input)
 
 %% Unpack the inputs
 simpar = input.simpar;
-w_r = input.w_r;
-w_d = input.w_d;
-w_h = input.w_h;
 a_thrust = input.a_thrust;
 a_grav = input.a_grav;
 omega_bi_m = [0;0;1];
@@ -28,7 +25,6 @@ tau_r = simpar.general.tau_r;
 tau_a = simpar.general.tau_a;
 d_g = simpar.general.d_g;
 d_h = simpar.general.d_h;
-v_perp = abs(x(simpar.states.ix.vel(1)));
 
 %% Unpack x
 r = x(simpar.states.ix.pos);
@@ -42,24 +38,20 @@ accl_bias = x(simpar.states.ix.b_accl);
 
 %% Compute individual elements of x_dot
 r_dot = v;
-% a_grav = -mu/norm(r)^3 * r;
-% %%%%%Fix this
-% a_thrust = guidance();
-% %%%%%
 v_dot = a_grav + a_thrust + g_bias + input.w_a;
 
 q_im_dot = 1/2*qmult([0;omega_bi_m],cam);
 q_bc_dot = zeros(4,1);
 
-b_r_dot = -1/tau_r*range_bias + w_r;
+b_r_dot = -1/tau_r*range_bias + input.w_r;
 
 i_hat = r/norm(r);
-% v_perp = v - omega_bi_m*r - (v * i_hat)*i_hat;
-gbias_dot = -norm(v_perp)/d_g*g_bias + w_d;
+v_perp = v - omega_bi_m*r - (v * i_hat)*i_hat;
+gbias_dot = -norm(v_perp)/d_g*g_bias + input.w_d;
 
-h_dot = norm(v_perp)/d_h*height + w_h;
+h_dot = norm(v_perp)/d_h*height + input.w_h;
 
-b_ax_dot = -accl_bias/tau_a + w;
+b_ax_dot = -accl_bias/tau_a + input.w_a;
 
 %% Assign to output
 xdot = [r_dot;...
