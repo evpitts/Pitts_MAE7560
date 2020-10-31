@@ -90,13 +90,13 @@ for i=2:nstep
 %     w_a = sqrt(simpar.truth.params.Q_nongra/simpar.general.dt)*randn(2,1);
 %     w_p = sqrt(Q_p/simpar.general.dt).*randn(length(simpar.states.ix.param),1);
 %     input_truth.w_g = w_g;
-    input_truth.w_a = 0;
-    input_truth.w_r = 0;
+    input_truth.w_a = zeros(3,1);
+    input_truth.w_r = zeros(3,1);
     input_truth.w_d = 0;
     input_truth.w_h = 0;
     input_truth.w_accl = 0;
-%     input_truth.a_grav = a_grav;
-%     input_truth.a_thr = a_thr(:,i-1);
+    input_truth.a_grav = a_grav;
+    input_truth.a_thrust = a_thr(:,i-1);
     input_truth.simpar = simpar;
     %Perform one step of RK4 integration
     x_buff(:,i) = rk4('truthState_de', x_buff(:,i-1), input_truth,...
