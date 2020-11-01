@@ -13,3 +13,4 @@ sims/*
 .orig
 html/*
 *.mat
+.DS_Store
