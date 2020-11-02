@@ -73,6 +73,7 @@ for i=2:nstep
     %   Realize a sample of process noise (don't forget to scale Q by 1/dt!)
     %   Define any inputs to the truth state DE
     %   Perform one step of RK4 integration
+    % This assumes planar motion
     input_truth.v_perp = x_buff(simpar.states.ix.vel(2),i-1);
     %Acceleration due to moon gravity
     input_truth.a_grav = a_grav;
@@ -161,7 +162,7 @@ for i=2:nstep
     a_thr(:,i) = guidance(x_buff(simpar.states.ix.pos,i),...
                           x_buff(simpar.states.ix.vel,i),...
                           af, vf, rf,...
-                          simpar.general.tsim,...
+                          simpar.general.tsim-t(i),...
                           a_grav, 'apollo');
 
     if verbose && mod(i,100) == 0

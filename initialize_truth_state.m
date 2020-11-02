@@ -37,5 +37,6 @@ x = zeros(length(names),1);
 for i=1:length(names)
     x(i) = simpar.general.ic.(names{i});
 end
+x(simpar.states.ix.q_camera) = simpar.general.q_b2c_nominal;
 
 end
