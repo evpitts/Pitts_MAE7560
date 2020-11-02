@@ -47,6 +47,19 @@ stairs(traj.time_nav,alt);
 xlabel('time$\left(s\right)$','Interpreter','latex');
 ylabel('altitude$\left(km\right)$','Interpreter','latex');
 grid on;
+%% Plot Position
+%Create a new figure at the end of the figure array
+h_figs(end+1) = figure;
+%Plot the truth state position over time. We only need to plot in two
+%dimensions because we assumed as trajectory in the z plane.
+%I don't quite understand why Dr. Chrsitensen is plotting a single time
+%step here instead of plotting against the time vector. 
+plot(traj.truthState(simpar.states.ix.pos(1),:)'*m2km, traj.truthState(simpar.states.ix.pos(2),:)'*m2km,'LineWidth',2);
+%Matlab supports a subset of Tex markup
+xlabel('$x_i\left(km\right)$','Interpreter','latex')
+ylabel('$y_i\left(km\right)$','Interpreter','latex')
+grid on;
+
 %% Plot angular rates
 h_figs(end+1) = figure;
 stairs(traj.time_nav,traj.gyro');
@@ -79,7 +92,7 @@ stairs(traj.time_nav, traj.angle_of_incidence_deg);
 xlabel('time$\left(s\right)$','Interpreter','latex');
 ylabel('$\gamma\left(deg\right)$','Interpreter','latex');
 grid on;
-%% Example residuals
+%% CHANGE THIS
 h_figs(end+1) = figure;
 stairs(traj.time_kalman,traj.navRes.example'); hold on
 xlabel('Time(s)')
