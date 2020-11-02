@@ -36,7 +36,42 @@ hmoon = surf(X*R,Y*R,Z*R,'FaceAlpha',0.2,...
     'FaceColor','k','EdgeAlpha',0.3);
 legend([htraj, hstart, hstop, hmoon],...
     'trajectory','start','stop','moon','Interpreter','latex')
-%% Plot Altitude vs. time
+%% Plot position
+%Create a new figure at the end of the figure array
+h_figs(end+1) = figure;
+%Plot the truth state position over time. We only need to plot in two
+%dimensions because we assumed as trajectory in the z plane.
+%I don't quite understand why Dr. Chrsitensen is plotting a single time
+%step here instead of plotting against the time vector. 
+plot(traj.truthState(simpar.states.ix.pos(1),:)'*m2km, traj.truthState(simpar.states.ix.pos(2),:)'*m2km,'LineWidth',2);
+%Matlab supports a subset of Tex markup
+title('Positions')
+xlabel('$x_i\left(km\right)$','Interpreter','latex')
+ylabel('$y_i\left(km\right)$','Interpreter','latex')
+grid on;
+%% Plot velocity
+h_figs(end+1) = figure;
+plot(traj.time_nav, traj.truthState(simpar.states.ix.vel,:)'*m2km,'LineWidth',2);
+title('Velocities')
+xlabel('t')
+ylabel('Velocity (km/s)')
+legend('Vx','Vy','Vz')
+grid on;
+%% Plot position
+h_figs(end+1) = figure;
+plot(traj.time_nav, traj.truthState(simpar.states.ix.pos,:)'*m2km,'LineWidth',2);
+xlabel('t')
+ylabel('Positon(km)')
+legend('Rx','Ry','Rz')
+grid on;
+%% Plot acceleration due to thrust
+h_figs(end+1) = figure;
+plot(traj.time_nav, traj.a_thrust'*m2km,'LineWidth',2);
+xlabel('t')
+ylabel('Thrust Acceleration (km/s^2)')
+legend('Tx','Ty','Tz')
+grid on;
+%% Plot altitude vs. time
 r_mag = sqrt(traj.truthState(simpar.states.ix.pos(1),:).^2 ...
     + traj.truthState(simpar.states.ix.pos(2),:).^2 ...
     + traj.truthState(simpar.states.ix.pos(3),:).^2)*m2km;
@@ -47,57 +82,36 @@ stairs(traj.time_nav,alt);
 xlabel('time$\left(s\right)$','Interpreter','latex');
 ylabel('altitude$\left(km\right)$','Interpreter','latex');
 grid on;
-%% Plot Position
-%Create a new figure at the end of the figure array
-h_figs(end+1) = figure;
-%Plot the truth state position over time. We only need to plot in two
-%dimensions because we assumed as trajectory in the z plane.
-%I don't quite understand why Dr. Chrsitensen is plotting a single time
-%step here instead of plotting against the time vector. 
-plot(traj.truthState(simpar.states.ix.pos(1),:)'*m2km, traj.truthState(simpar.states.ix.pos(2),:)'*m2km,'LineWidth',2);
-%Matlab supports a subset of Tex markup
-xlabel('$x_i\left(km\right)$','Interpreter','latex')
-ylabel('$y_i\left(km\right)$','Interpreter','latex')
-grid on;
-
-%% Plot angular rates
-h_figs(end+1) = figure;
-stairs(traj.time_nav,traj.gyro');
-title('Angular rate');
-xlabel('time(s)');
-ylabel('rad/s');
-legend('x_b','y_b','z_b')
-grid on;
 %% Plot attitude vs. time
-nsamp = length(traj.time_nav);
-q_lvlh2b = zeros(4,nsamp);
-q_lvlh2c = zeros(4,nsamp);
-q_b2c = traj.q_b2c_nominal;
-for i=1:nsamp
-    q_i2b = traj.truthState(simpar.states.ix.att,i);
-    q_i2lvlh = tmat2q(inertial2lvlh(traj.truthState(simpar.states.ix.pos,i),...
-        traj.truthState(simpar.states.ix.vel,i)));
-    q_lvlh2b(:,i) = qmult(q_i2b,qConjugate(q_i2lvlh));
-    q_lvlh2c(:,i) = qmult(q_b2c,q_lvlh2b(:,i));
-end
-h_figs(end+1) = figure;
-stairs(traj.time_nav,q_lvlh2c');
-xlabel('time$\left(s\right)$','Interpreter','latex');
-ylabel('$q^{lvlh}_{c}$','Interpreter','latex')
-legend('q_0','q_i','q_j','q_k')
-grid on;
+% nsamp = length(traj.time_nav);
+% q_lvlh2b = zeros(4,nsamp);
+% q_lvlh2c = zeros(4,nsamp);
+% q_b2c = traj.q_b2c_nominal;
+% for i=1:nsamp
+%     q_i2b = traj.truthState(simpar.states.ix.att,i);
+%     q_i2lvlh = tmat2q(inertial2lvlh(traj.truthState(simpar.states.ix.pos,i),...
+%         traj.truthState(simpar.states.ix.vel,i)));
+%     q_lvlh2b(:,i) = qmult(q_i2b,qConjugate(q_i2lvlh));
+%     q_lvlh2c(:,i) = qmult(q_b2c,q_lvlh2b(:,i));
+% end
+% h_figs(end+1) = figure;
+% stairs(traj.time_nav,q_lvlh2c');
+% xlabel('time$\left(s\right)$','Interpreter','latex');
+% ylabel('$q^{lvlh}_{c}$','Interpreter','latex')
+% legend('q_0','q_i','q_j','q_k')
+% grid on;
 %% Plot camera angle of incidence
+% h_figs(end+1) = figure;
+% stairs(traj.time_nav, traj.angle_of_incidence_deg);
+% xlabel('time$\left(s\right)$','Interpreter','latex');
+% ylabel('$\gamma\left(deg\right)$','Interpreter','latex');
+% grid on;
+%% Loss residuals
 h_figs(end+1) = figure;
-stairs(traj.time_nav, traj.angle_of_incidence_deg);
-xlabel('time$\left(s\right)$','Interpreter','latex');
-ylabel('$\gamma\left(deg\right)$','Interpreter','latex');
-grid on;
-%% CHANGE THIS
-h_figs(end+1) = figure;
-stairs(traj.time_kalman,traj.navRes.example'); hold on
+stairs(traj.time_kalman,traj.navRes.loss');
 xlabel('Time(s)')
-ylabel('Star Tracker Residuals(rad)')
-legend('x_{st}','y_{st}','z_{st}')
+ylabel('Loss residuals')
+legend('$l_{x}/l_{z}$','$l_{y}/l_{z}$', 'Interpreter', 'latex')
 grid on;
 %% Calculate estimation errors
 dele = calcErrors(traj.navState, traj.truthState, simpar);

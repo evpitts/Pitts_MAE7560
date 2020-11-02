@@ -28,14 +28,7 @@ if length(varargin) >= 1
 else
     option = 'apollo';
 end
-%% Compute the guidance acceleration
-% disp(r)
-% disp(v)
-% disp(af)
-% disp(vf)
-% disp(rf)
-% disp(tgo)
-% disp(t)
+%% Compute the guidance acceleration\
 if strcmp(option, 'e-guidance')
     if tgo > 0.001
         a = -2/tgo*(vf - v) + 6/tgo^2*(rf - r - v*tgo) - g;
