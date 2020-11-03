@@ -11,8 +11,9 @@ qi2b = tmat2q(Ti2b);
 qi2m = x(simpar.states.ix.q_moon);
 Ti2m = q2tmat(qi2m);
 %Do the body to camera transformation
-Tb2c = q2tmat(simpar.general.q_b2c_nominal);
-qb2c = x(simpar.states.ix.q_camera);
+Tb2c = eye(3,3);
+qb2c = q2tmat(simpar.general.q_b2c_nominal);
+%qb2c = x(simpar.states.ix.q_camera);
 
 r_f_i = [200e2; 1730e3; 100e3];
 lc = Tb2c*Ti2b*(r_f_i-r_b_i);
@@ -20,6 +21,7 @@ lx = lc(1);
 ly = lc(2);
 lz = lc(3);
 
+%We assume the noise is zero at this point - 11/03/2020
 nu_c = 0;
 z_tilde = [lx/lz; ly/lz] + nu_c;
 end
