@@ -74,9 +74,9 @@ for i=2:nstep
     %   Define any inputs to the truth state DE
     %   Perform one step of RK4 integration
     % This assumes planar motion
-    input_truth.v_perp = x_buff(simpar.states.ix.vel(2),i-1);
     %Acceleration due to moon gravity
-    input_truth.a_grav = a_grav;
+    %TODO: re-evaluate gravity on every timestep
+%     input_truth.a_grav = simpar.general.MU/norm(x_buff(simpar.states.ix)^3*r_i_ref;
     %Acceleration due to thrust
     input_truth.a_thrust = a_thr(:,i-1);
     
@@ -98,7 +98,7 @@ for i=2:nstep
     %   Assign inputs to the navigation state DE
     %   Perform one step of RK4 integration
     input_nav.ytilde = ytilde_buff(:,i);
-    input_nav.v_perp = x_buff(simpar.states.ix.vel(2),i-1);
+%     input_nav.v_perp = x_buff(simpar.states.ix.vel(2),i-1);
     input_nav.simpar = simpar;
     input_nav.a_grav = a_grav;
     xhat_buff(:,i) = rk4('navState_de', xhat_buff(:,i-1), input_nav, ...

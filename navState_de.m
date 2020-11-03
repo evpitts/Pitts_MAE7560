@@ -19,9 +19,7 @@ function xhatdot = navState_de(xhat,input)
 %% Unpack the inputs
 simpar = input.simpar;
 a_tilde = input.ytilde;
-v_perp_hat = input.v_perp;
 % a_thrust = input.a_thrust;
-a_grav = input.a_grav;
 
 T_i2b = calc_attitude(xhat, simpar);
 T_b2i = T_i2b'; %Review why this is a transpose instead of an inverse
@@ -43,6 +41,7 @@ accl_bias_hat = xhat(simpar.states.ixf.b_accl);
 
 %% Compute individual elements of x_dot
 rhat_dot = v_hat;
+a_grav = -simpar.general.MU/norm(r_hat)^3*r_hat;
 vhat_dot = T_b2i*(a_tilde-accl_bias_hat)+a_grav+ghat_bias;
 
 bhat_r_dot = -1/tau_r*range_bias_hat;

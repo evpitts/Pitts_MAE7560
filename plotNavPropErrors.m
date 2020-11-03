@@ -43,7 +43,8 @@ h_figs(end+1) = figure;
 %dimensions because we assumed as trajectory in the z plane.
 %I don't quite understand why Dr. Chrsitensen is plotting a single time
 %step here instead of plotting against the time vector. 
-plot(traj.truthState(simpar.states.ix.pos(1),:)'*m2km, traj.truthState(simpar.states.ix.pos(2),:)'*m2km,'LineWidth',2);
+plot(traj.truthState(simpar.states.ix.pos(1),:)'*m2km, ...
+    traj.truthState(simpar.states.ix.pos(2),:)'*m2km,'LineWidth',2);
 %Matlab supports a subset of Tex markup
 title('Positions')
 xlabel('$x_i\left(km\right)$','Interpreter','latex')
