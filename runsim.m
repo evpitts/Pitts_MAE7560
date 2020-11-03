@@ -151,9 +151,9 @@ for i=2:nstep
 % % %         P_buff(:,:,k) = update_covariance();
 % % %         xhat_buff(:,i) = correctErrors();
         %Synthesize the measurement
-        [loss_ztilde, r_fi] = loss.synth_measurement(x_buff(:,1),simpar);
+        [loss_ztilde, r_fi] = loss.synth_measurement(x_buff(:,i),simpar);
         %Predict the measurement
-        loss_ztildehat = loss.pred_measurement(xhat_buff(:,1),r_fi,simpar);
+        loss_ztildehat = loss.pred_measurement(xhat_buff(:,i),r_fi,simpar);
         %Get the prediction error
         loss_res(:,k) = loss_ztilde-loss_ztildehat;
     end

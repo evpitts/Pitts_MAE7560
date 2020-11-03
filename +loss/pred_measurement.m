@@ -3,6 +3,7 @@ function[zhat_tilde] = pred_measurement(xhat,r_fi,simpar)
 rhat_i = xhat(simpar.states.ixf.pos);
 
 Ti2b = calc_attitude(xhat, simpar);
+%TODO: fix the following line
 Tb2c = eye(3,3); %for now (this will be known)
 
 %Predict LOS vector
