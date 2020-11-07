@@ -104,16 +104,16 @@ for i=2:nstep
     xhat_buff(:,i) = rk4('navState_de', xhat_buff(:,i-1), input_nav, ...
         simpar.general.dt);
     % Propagate the covariance to t_n
-    input_cov.simpar = simpar;
-    input_cov.ytilde = [];
+%     input_cov.simpar = simpar;
+%     input_cov.ytilde = [];
 %     input_cov.x = x_buff(:,i-1);
 %     input_cov.xhat = xhat_buff(:,i-1);
 %     P_buff(:,:,i) = rk4('navCov_de', P_buff(:,:,i-1), input_cov, ...
 %         simpar.general.dt);
     % Propagate the error state from tn-1 to tn if errorPropTestEnable == 1
-    if simpar.general.errorPropTestEnable
+    if simpar.general.errorPropTestEnable1
         input_delx.xhat = xhat_buff(:,i-1);
-        input_delx.ytilde = [];
+        input_delx.x = x_buff(:,i-1);
         input_delx.simpar = simpar;
         delx_buff(:,i) = rk4('errorState_de', delx_buff(:,i-1), ...
             input_delx, simpar.general.dt);
@@ -150,6 +150,8 @@ for i=2:nstep
 % % %         del_x = estimate_error_state_vector();
 % % %         P_buff(:,:,k) = update_covariance();
 % % %         xhat_buff(:,i) = correctErrors();
+%       %The Kalman gain is set to zero for Linear Error Modeling
+%       K = 0
         %Synthesize the measurement
         [loss_ztilde, r_fi] = loss.synth_measurement(x_buff(:,i),simpar);
         %Predict the measurement

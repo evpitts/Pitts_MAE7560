@@ -3,7 +3,6 @@ function[zhat_tilde] = pred_measurement(xhat,r_fi,simpar)
 rhat_i = xhat(simpar.states.ixf.pos);
 
 Ti2b = calc_attitude(xhat, simpar);
-%TODO: fix the following line
 Tb2c = q2tmat(simpar.general.q_b2c_nominal);
 
 %Predict LOS vector
