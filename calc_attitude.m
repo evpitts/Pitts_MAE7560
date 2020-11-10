@@ -18,6 +18,6 @@ T_i2b = [u_xb_i';u_yb_i';u_zi_i'];
 % u_xb_i = cross(u_yb_i,u_zb_i);
 % T_i2b = [u_xb_i';u_yb_i';u_zb_i'];
 
-assert(all(all(abs(T_i2b*T_i2b' - eye(3))<= 1e-12)),'T_i2b not orthonormal')
+% assert(all(all(abs(T_i2b*T_i2b' - eye(3))<= 1e-12)),'T_i2b not orthonormal')
 
 end

@@ -38,8 +38,9 @@ xhat_buff(:,1) = initialize_nav_state(x_buff(:,1),simpar);
 %% Miscellaneous calcs
 %Guidance law
 %[a] = guidance(r, v, af, vf, rf, tgo, g, varargin);
-r_i_ref = [0, 0, simpar.general.R_M]';
-a_grav = simpar.general.MU/norm(r_i_ref)^3*r_i_ref;
+%r_i_ref = [0, 0, simpar.general.R_M]';
+a_grav = [0;0;1.6242];
+%simpar.general.MU/norm(r_i_ref)^3*r_i_ref;
 
 af = [simpar.general.astar_x_tf; simpar.general.astar_y_tf; simpar.general.astar_z_tf];
 vf = [simpar.general.vstar_x_tf; simpar.general.vstar_y_tf; simpar.general.vstar_z_tf];
@@ -57,7 +58,7 @@ k = 1;
 %Check that the error injection, calculation, and removal are all
 %consistent if the simpar.general.checkErrDefConstEnable is enabled.
 if simpar.general.checkErrDefConstEnable
-    checkErrorDefConsistency(xhat_buff(:,1), x_buff(:,1), simpar)
+    checkErrorDefConsistency(xhat_buff(:,1), x_buff(:,1), simpar);
 end
 %Inject errors if the simpar.general.errorPropTestEnable flag is enabled
 if simpar.general.errorPropTestEnable
@@ -98,7 +99,6 @@ for i=2:nstep
     %   Assign inputs to the navigation state DE
     %   Perform one step of RK4 integration
     input_nav.ytilde = ytilde_buff(:,i);
-%     input_nav.v_perp = x_buff(simpar.states.ix.vel(2),i-1);
     input_nav.simpar = simpar;
     input_nav.a_grav = a_grav;
     xhat_buff(:,i) = rk4('navState_de', xhat_buff(:,i-1), input_nav, ...
@@ -111,9 +111,9 @@ for i=2:nstep
 %     P_buff(:,:,i) = rk4('navCov_de', P_buff(:,:,i-1), input_cov, ...
 %         simpar.general.dt);
     % Propagate the error state from tn-1 to tn if errorPropTestEnable == 1
-    if simpar.general.errorPropTestEnable1
+    if simpar.general.errorPropTestEnable
         input_delx.xhat = xhat_buff(:,i-1);
-        input_delx.x = x_buff(:,i-1);
+        input_delx.ytilde = [];
         input_delx.simpar = simpar;
         delx_buff(:,i) = rk4('errorState_de', delx_buff(:,i-1), ...
             input_delx, simpar.general.dt);

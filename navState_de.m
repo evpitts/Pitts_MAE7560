@@ -34,7 +34,6 @@ d_h = simpar.general.d_h;
 r_hat = xhat(simpar.states.ixf.pos);
 v_hat = xhat(simpar.states.ixf.vel);
 range_bias_hat = xhat(simpar.states.ixf.b_clock);
-%The help session sheet does not have a hat on epsilon_g
 ghat_bias = xhat(simpar.states.ixf.gbias);
 height_hat = xhat(simpar.states.ixf.h_t);
 accl_bias_hat = xhat(simpar.states.ixf.b_accl);
@@ -46,7 +45,6 @@ vhat_dot = T_b2i*(a_tilde-accl_bias_hat)+a_grav+ghat_bias;
 
 bhat_r_dot = -1/tau_r*range_bias_hat;
 
-%I'm not sure if I should be using v_perp or v_perp_hat
 i_hat = r_hat/norm(r_hat);
 v_perp_hat = v_hat-cross(omega_mi_m,r_hat)-dot(v_hat, i_hat)*i_hat;
 

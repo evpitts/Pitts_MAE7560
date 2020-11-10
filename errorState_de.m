@@ -3,7 +3,7 @@ function [ delx_dot ] = errorState_de( delx, input )
 %of the covariance of the navigation state estimates
 
 %Compute state dynamics matrix
-Fhat = calc_F(input.xhat, input.x, input.simpar );
+Fhat = calc_F(input.xhat, input.ytilde, input.simpar );
 
 %Compute Phat_dot
 delx_dot = Fhat*delx;
