@@ -23,12 +23,6 @@ function [ x ] = initialize_truth_state(simpar)
 % covariance matrix.  One realistic way to do this is to set the true 
 % vehicle states to the same thing every time, and randomize any sensor 
 % parameters.
-
-% disp(simpar.general.ic(1))
-% for index = 1:length(simpar.general.ic)
-%     x(index,1) = simpar.general.ic(index);
-% end
-% disp(x)
 fnames = fieldnames(simpar.general.ic);
 x = zeros(length(fnames),1);
 
@@ -45,13 +39,4 @@ x(simpar.states.ix.h_t) = simpar.truth.ic.sig_h*randn;
 x(simpar.states.ix.b_accl(1)) = simpar.truth.ic.sig_ax*randn;
 x(simpar.states.ix.b_accl(2)) = simpar.truth.ic.sig_ay*randn;
 x(simpar.states.ix.b_accl(3)) = simpar.truth.ic.sig_az*randn;
-% names = fieldnames(simpar.general.ic);
-% x = zeros(length(names),1);
-% 
-% %Get all of the initial conditions
-% for i=1:length(names)
-%     x(i) = simpar.general.ic.(names{i});
-% end
-% x(simpar.states.ix.q_camera) = simpar.general.q_b2c_nominal;
-% 
 end

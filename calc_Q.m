@@ -23,5 +23,4 @@ Q_g = 2*norm(v_perp)*simpar.nav.params.sig_grav_ss^2/simpar.general.d_g*eye(3);
 Q_h = 2*norm(v_perp)*simpar.nav.params.sig_h_ss^2/simpar.general.d_h;
 
 Q = blkdiag(Q_a, Q_rbias, Q_g, Q_h, Q_abias);
-%Q = blkdiag(Q_rbias, Q_g, Q_g, Q_g, Q_h, Q_abias, Q_abias, Q_abias);
 end

@@ -30,15 +30,15 @@ F = calc_F(xhat, ytilde, simpar);
 %Compute process noise coupling matrix
 B = calc_G(xhat, simpar);
 
-S_eta = simpar.nav.params.vrw^2*eye(3);
-
-%Compute measurement noise coupling matrix
-F_eta = zeros(n,3);
+% S_eta = simpar.nav.params.vrw^2*eye(3);
+% 
+% %Compute measurement noise coupling matrix
+% F_eta = zeros(n,3);
 
 %Compute process noise PSD matrix
 Q = calc_Q(v_perp, simpar);
 
 %Compute Phat_dot
-P_dot = F*P+P*F'+F_eta*S_eta*F_eta'+B*Q*B';
+P_dot = F*P+P*F'+B*Q*B';%+F_eta*S_eta*F_eta'
 
 end
