@@ -27,10 +27,10 @@ ytilde_buff     = zeros(simpar.general.n_inertialMeas,nstep);
 % Residual buffers (star tracker is included as an example)
 % res_example          = zeros(3,nstep_aid);
 % resCov_example       = zeros(3,3,nstep_aid);
-K_example_buff       = zeros(simpar.states.nxfe,3,nstep_aid);
+%K_example_buff       = zeros(simpar.states.nxfe,3,nstep_aid);
 loss_res = zeros(2, nstep_aid);
 %% Initialize the navigation covariance matrix
-% P_buff(:,:,1) = initialize_covariance();
+P_buff(:,:,1)   = initialize_covariance(simpar);
 %% Initialize the truth state vector
 x_buff(:,1) = initialize_truth_state(simpar);
 %% Initialize the navigation state vector
@@ -52,7 +52,8 @@ a_thr(:,1) = guidance(x_buff(simpar.states.ix.pos,1),...
                       simpar.general.tsim,...
                       a_grav, 'apollo');
 % Synthesize continuous sensor data at t_n-1
-% ytilde_buff(:,1) = contMeas();
+wa_0 = sqrt(simpar.truth.params.Q_nongrav/simpar.general.dt)*randn(3,1);
+ytilde_buff(:,1) = contMeas(x_buff(:,1), a_thr(:,1), wa_0, simpar);
 %Initialize the measurement counter
 k = 1;
 %Check that the error injection, calculation, and removal are all
@@ -68,33 +69,55 @@ if simpar.general.errorPropTestEnable
     end
     xhat_buff(:,1) = injectErrors(truth2nav(x_buff(:,1)), delx_buff(:,1), simpar);
 end
+%% Compute the Q matrices (constant process noise PSDs)
+Q_rbias = 2*simpar.truth.params.sig_rbias_ss^2/simpar.general.tau_r;
+Q_abias = 2*simpar.truth.params.sig_abias_ss^2/simpar.general.tau_a;
 %% Loop over each time step in the simulation
 for i=2:nstep
     % Propagate truth states to t_n
     %   Realize a sample of process noise (don't forget to scale Q by 1/dt!)
     %   Define any inputs to the truth state DE
     %   Perform one step of RK4 integration
-    % This assumes planar motion
-    %Acceleration due to moon gravity
-    %TODO: re-evaluate gravity on every timestep
-%     input_truth.a_grav = simpar.general.MU/norm(x_buff(simpar.states.ix)^3*r_i_ref;
-    %Acceleration due to thrust
+    
+    %We use the truth state for the position and velocity, and with v_perp
+    r = x_buff(simpar.states.ix.pos, i-1);
+    v = x_buff(simpar.states.ix.vel, i-1);
+    omega = simpar.general.omega_moon;
+    omega_mi_m = [0;0;omega];
+    v_perp = v-cross(omega_mi_m,r)-dot(v, r/norm(r))*r/norm(r);
+    
+    %Acceleration due to thrust - we use the thrust from the previous time
+    %step
     input_truth.a_thrust = a_thr(:,i-1);
+    input_truth.v_perp = v_perp;
+    
+    %Calculate the noise values
+    %Noise in 
+    Q_g = 2*norm(v_perp)*simpar.truth.params.sig_grav_ss^2/simpar.general.d_g;
+    w_g = sqrt(Q_g/simpar.general.dt).*randn(3,1);
+    
+    %Noise in 
+    w_a = sqrt(simpar.truth.params.Q_nongrav/simpar.general.dt).*randn(3,1);
+    w_r = sqrt(Q_rbias/simpar.general.dt)*randn;
+    
+    %Noise in 
+    Q_h = 2*norm(v_perp)*simpar.truth.params.sig_h_ss^2/simpar.general.d_h;
+    w_h = sqrt(Q_h/simpar.general.dt)*randn;
+    w_accl = sqrt(Q_abias/simpar.general.dt).*randn(3,1);
     
     %Noise values - accelerometer, range, something, height, acceleration
-    input_truth.w_a = 0;
-    input_truth.w_r = 0;
-    input_truth.w_d = 0;
-    input_truth.w_h = 0;
-    input_truth.w_accl = 0;
-
+    input_truth.w_a = w_a;
+    input_truth.w_r = w_r;
+    input_truth.w_d = w_g;
+    input_truth.w_h = w_h;
+    input_truth.w_accl = w_accl;
     input_truth.simpar = simpar;
     
     %Perform one step of RK4 integration
     x_buff(:,i) = rk4('truthState_de', x_buff(:,i-1), input_truth,...
         simpar.general.dt);
     % Synthesize continuous sensor data at t_n
-    ytilde_buff(:,i) = contMeas(x_buff(:,i), a_thr(:,i-1), input_truth.w_a, input_truth.simpar);
+    ytilde_buff(:,i) = contMeas(x_buff(:,i), a_thr(:,i-1), w_a, simpar);
     % Propagate navigation states to t_n using sensor data from t_n-1
     %   Assign inputs to the navigation state DE
     %   Perform one step of RK4 integration
@@ -104,12 +127,13 @@ for i=2:nstep
     xhat_buff(:,i) = rk4('navState_de', xhat_buff(:,i-1), input_nav, ...
         simpar.general.dt);
     % Propagate the covariance to t_n
-%     input_cov.simpar = simpar;
-%     input_cov.ytilde = [];
-%     input_cov.x = x_buff(:,i-1);
-%     input_cov.xhat = xhat_buff(:,i-1);
-%     P_buff(:,:,i) = rk4('navCov_de', P_buff(:,:,i-1), input_cov, ...
-%         simpar.general.dt);
+    input_cov.simpar = simpar;
+    input_cov.ytilde = ytilde_buff(:,i);
+    input_cov.x = x_buff(:,i-1);
+    input_cov.xhat = xhat_buff(:,i-1);
+    input_cov.v_perp = v_perp;
+    P_buff(:,:,i) = rk4('navCov_de', P_buff(:,:,i-1), input_cov, ...
+        simpar.general.dt);
     % Propagate the error state from tn-1 to tn if errorPropTestEnable == 1
     if simpar.general.errorPropTestEnable
         input_delx.xhat = xhat_buff(:,i-1);
@@ -126,6 +150,12 @@ for i=2:nstep
             checkErrorPropagation(x_buff(:,i), xhat_buff(:,i),...
                 delx_buff(:,i), simpar);
         end
+        
+        %Validate Linearization
+        if simpar.general.measLinerizationCheckEnable
+            loss.validate_linearization(x_buff(:,i),simpar);
+        end
+        
         %Adjust the Kalman update index
         k = k + 1;
         %   For each available measurement
@@ -152,12 +182,12 @@ for i=2:nstep
 % % %         xhat_buff(:,i) = correctErrors();
 %       %The Kalman gain is set to zero for Linear Error Modeling
 %       K = 0
+        %Calculate H
+        %H = compute_H(x_buff(:,i), xhat_buff(:,i), simpar);
+        
         %Synthesize the measurement
-        [loss_ztilde, r_fi] = loss.synth_measurement(x_buff(:,i),simpar);
-        %Predict the measurement
-        loss_ztildehat = loss.pred_measurement(xhat_buff(:,i),r_fi,simpar);
-        %Get the prediction error
-        loss_res(:,k) = loss_ztilde-loss_ztildehat;
+        [loss_ztilde, r_f_i] = loss.synth_measurement(x_buff(:,i),simpar);
+        loss_res(:,k) = loss.compute_residual(xhat_buff(:,i), loss_ztilde, r_f_i, simpar);
     end
     
     %Recalculate a_thr by calling the guidance law again

@@ -1,4 +1,4 @@
-function [ G ] = calc_G( ~, simpar )
+function [ G ] = calc_G( xhat, simpar )
 %calc_G Calculates the process noise dynamic coupling matrix
 %
 % Inputs:
@@ -19,5 +19,10 @@ function [ G ] = calc_G( ~, simpar )
 %% Unpack the inputs
 
 %% Compute G
-G = [];
+Ti2b = calc_attitude(xhat, simpar);
+Tb2i = Ti2b';
+n = simpar.states.nxfe;
+G = zeros(n,11);
+G(simpar.states.ix.vel, simpar.states.ix.pos) = -Tb2i;
+G(7:14,4:11) = eye(8);
 end

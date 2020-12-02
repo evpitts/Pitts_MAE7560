@@ -20,16 +20,25 @@
 xhat = input.xhat;
 simpar = input.simpar;
 ytilde = input.ytilde;
+v_perp = input.v_perp;
+
+n = simpar.states.nxfe;
 
 %Compute state dynamics matrix
 F = calc_F(xhat, ytilde, simpar);
 
 %Compute process noise coupling matrix
-G = calc_G(xhat, simpar);
+B = calc_G(xhat, simpar);
+
+S_eta = simpar.nav.params.vrw^2*eye(3);
+
+%Compute measurement noise coupling matrix
+F_eta = zeros(n,3);
 
 %Compute process noise PSD matrix
-Q = calc_Q(xhat, simpar);
+Q = calc_Q(v_perp, simpar);
 
 %Compute Phat_dot
-P_dot = [];
+P_dot = F*P+P*F'+F_eta*S_eta*F_eta'+B*Q*B';
+
 end
