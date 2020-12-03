@@ -17,7 +17,7 @@ function [ success ] = save_plots(h_figs, prefix, savedir, varargin)
 % Date: 09-Jun-2020 15:28:32
 % Reference:
 % Copyright 2020 Utah State University
-
+% savedir = "~/Fall\ 2020/Optimal\ Estimation/Pitts_OptEst/figures";
 if length(varargin) >= 1
     save_mfig = varargin{1};
 else
