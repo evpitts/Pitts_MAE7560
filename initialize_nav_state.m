@@ -22,4 +22,15 @@ function [ xhat ] = initialize_nav_state( x, simpar)
 % vehicle states, and initialize any sensor parameters to zero.  An example
 % of these calculations are shown below.
 xhat = truth2nav(x);
+%Inject errors into the position and velocity states 
+%(all other states were randomized when the truth state was initialized)
+xhat(simpar.states.ixf.pos(1)) = xhat(simpar.states.ix.pos(1))+simpar.truth.ic.sig_rsx*randn;
+xhat(simpar.states.ixf.pos(2)) = xhat(simpar.states.ix.pos(2))+simpar.truth.ic.sig_rsy*randn;
+xhat(simpar.states.ixf.pos(3)) = xhat(simpar.states.ix.pos(3))+simpar.truth.ic.sig_rsz*randn;
+
+xhat(simpar.states.ixf.vel(1)) = xhat(simpar.states.ix.vel(1))+simpar.truth.ic.sig_vsx*randn;
+xhat(simpar.states.ixf.vel(2)) = xhat(simpar.states.ix.vel(2))+simpar.truth.ic.sig_vsy*randn;
+xhat(simpar.states.ixf.vel(3)) = xhat(simpar.states.ix.vel(3))+simpar.truth.ic.sig_vsz*randn;
+
+xhat(simpar.states.ixf.parameter) = 0;
 end
