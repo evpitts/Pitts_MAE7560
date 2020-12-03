@@ -6,7 +6,7 @@ set(groot, 'defaultAxesTickLabelInterpreter','latex');
 %% Setup paths and matlab file object for saving data
 filename = getDateTimeStringFilename( 'sim' );
 paramfile = 'config.xlsx';
-savedir = strcat('.',filesep,'sims',filesep,filename,'\');
+savedir = strcat('.',filesep,'sims',filesep,filename,'/');
 mkdir(savedir)
 copyfile(paramfile,strcat(savedir,filename,'_config.xlsx'));
 [~,scriptname,~] = fileparts(mfilename('fullpath'));
@@ -113,9 +113,10 @@ if runMonteCarlo
             h = hfigs(i);
             filesubstr = matlab.lang.makeValidName(get(h,'Name'));
             figfilename = sprintf('monteCarlo_%d__%s',i,filesubstr);
-            saveas(h,fullfile(savedir,figfilename),'fig');
+            
+%             saveas(h,fullfile(savedir,figfilename),'fig');
             saveas(h,fullfile(savedir,figfilename),'png');
-            saveas(h,fullfile(savedir,figfilename),'espc');
+%             saveas(h,fullfile(savedir,figfilename),'espc');
         end
         disp('Plots saved.')
     end

@@ -24,8 +24,11 @@ b_a = x(simpar.states.ix.b_accl);
 %% Calculate vehicle attitude assuming y = -n_v;
 T_i2b = calc_attitude( x, simpar );
 
+%%Synthesized noise
+eta_a = sqrt(simpar.truth.params.vrw^2/simpar.general.dt)*rand(3,1);
+
 %% Compute accelorometer measurements
 %MAYBE NEED TO CHANGE BACK TO ADDING T AND a_th
 %The last term is the noise - we set it to zero
-ytilde = T_i2b * (a_thr + w_a) + b_a + 0;
+ytilde = T_i2b * (a_thr + w_a) + b_a + eta_a;
 end
