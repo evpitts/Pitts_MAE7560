@@ -18,8 +18,8 @@ function [ Fhat ] = calc_F( xhat, ytilde, simpar )
 % Copyright 2020 Utah State University
 
 %% Unpack the inputs
-r_hat = xhat(simpar.states.ixf.pos);
-v_hat = xhat(simpar.states.ixf.vel);
+r_hat = xhat(simpar.states.ixfe.pos);
+v_hat = xhat(simpar.states.ixfe.vel);
 omega_mi_m = [0;0;simpar.general.omega_moon];
 ihat_r = r_hat/norm(r_hat);
 v_perp_hat = v_hat-cross(omega_mi_m,r_hat)-dot(v_hat, ihat_r)*ihat_r;

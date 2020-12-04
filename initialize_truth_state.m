@@ -30,6 +30,8 @@ for index=1:length(fnames)
     x(index) = simpar.general.ic.(fnames{index});
 end
 
+x(simpar.states.ix.q_camera) = simpar.general.q_b2c_nominal;
+
 %Randomize every state except for the position and velocity states
 x(simpar.states.ix.b_clock) = simpar.truth.ic.sig_br*randn;
 x(simpar.states.ix.gbias(1)) = simpar.truth.ic.sig_epsx*randn;

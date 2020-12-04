@@ -52,7 +52,7 @@ gbias_dot = -norm(v_perp)/d_g*g_bias + input.w_d;
 
 h_dot = norm(v_perp)/d_h*height + input.w_h;
 
-b_ax_dot = -accl_bias/tau_a + input.w_a;
+b_ax_dot = -accl_bias/tau_a + input.w_accl;
 
 %% Assign to output
 xdot = [r_dot;...

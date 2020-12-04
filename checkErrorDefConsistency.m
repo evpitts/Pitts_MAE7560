@@ -19,9 +19,9 @@ dele = zeros(length(fnames),1);
 for i=1:length(fnames)
     dele(i) = simpar.errorInjection.(fnames{i});
 end
-xhat_errorInject = injectErrors(truth2nav(x), dele, simpar)
-estimationErrors = calcErrors(xhat_errorInject, x, simpar)
+xhat_errorInject = injectErrors(truth2nav(x), dele, simpar);
+estimationErrors = calcErrors(xhat_errorInject, x, simpar);
 assert(norm(estimationErrors - dele) < 1e-11);
-x_errorCorrect = correctErrors(xhat_errorInject, dele, simpar)
+x_errorCorrect = correctErrors(xhat_errorInject, dele, simpar);
 assert(norm(xhat - x_errorCorrect) < 1e-12);
 end

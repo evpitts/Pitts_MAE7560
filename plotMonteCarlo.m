@@ -32,7 +32,7 @@ for i=1:n
         [3*sqrt(filter_cov) -3*sqrt(filter_cov)],'--r');
     legend([h_hair(1), h_filter_cov(1)],'MC run','EKF cov')
     xlabel('time(s)')
-    ylabel(ylabels{i})
+    ylabel(ylabels{i},'Interpreter','latex')
 end
 % %% Create estimation error plots in LVLH frame
 % nsamp = length(traj_ref.time_nav);
