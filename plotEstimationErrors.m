@@ -11,38 +11,22 @@ navState = traj.navState;
 navCov = traj.navCov;
 nav_errors = calcErrors( navState, traj.truthState, simpar );
 h_figs = [];
-%% Star tracker residuals
-% if simpar.general.processStarTrackerEnable
-%     axis_str = {'$x_{st}$','$y_{st}$','$z_{st}$'};
-%     for i=1:3
-%         h_figs(end+1) = figure('Name',sprintf('res_st_%d',i)); %#ok<*AGROW>
-%         stairs(traj.time_kalman,traj.navRes.startracker(i,:)'); hold on
-%         stairs(traj.time_kalman,...
-%             3.*sqrt(squeeze(traj.navResCov.startracker(i,i,:))),'r--');
-%         stairs(traj.time_kalman,...
-%             -3.*sqrt(squeeze(traj.navResCov.startracker(i,i,:))),'r--');
-%         xlabel('time$\left(s\right)$','Interpreter','latex');
-%         ystring = sprintf('%s Star Tracker Residual(rad)',axis_str{i});
-%         ylabel(ystring,'Interpreter','latex')
-%         grid on;
-%     end
-% end
 %% Visual odometry residuals
-% if simpar.general.processVisualOdometryEnable
-%     axis_str = {'$x_{c}$','$y_{c}$','$z_{c}$'};
-%     for i=1:3
-%         h_figs(end+1) = figure('Name',sprintf('res_vo_%d',i)); %#ok<*AGROW>
-%         stairs(traj.time_kalman,traj.navRes.vo(i,:)'); hold on
-%         stairs(traj.time_kalman,...
-%             3.*sqrt(squeeze(traj.navResCov.vo(i,i,:))),'r--');
-%         stairs(traj.time_kalman,...
-%             -3.*sqrt(squeeze(traj.navResCov.vo(i,i,:))),'r--');
-%         xlabel('time$\left(s\right)$','Interpreter','latex');
-%         ystring = sprintf('%s VO Residual(rad)',axis_str{i});
-%         ylabel(ystring,'Interpreter','latex')
-%         grid on;
-%     end
-% end
+if simpar.general.processVisualOdometryEnable
+    axis_str = {'$l_{x}/l_{z}$','$l_{y}/l_{z}$'};
+    for i=1:2
+        h_figs(end+1) = figure('Name',sprintf('res_LOS_%d',i)); %#ok<*AGROW>
+        stairs(traj.time_kalman,traj.navRes.los(i,:)'); hold on
+        stairs(traj.time_kalman,...
+            3.*sqrt(squeeze(traj.navResCov.los(i,i,:))),'r--');
+        stairs(traj.time_kalman,...
+            -3.*sqrt(squeeze(traj.navResCov.los(i,i,:))),'r--');
+        xlabel('time$\left(s\right)$','Interpreter','latex');
+        ystring = sprintf('%s LOS Residual',axis_str{i});
+        ylabel(ystring,'Interpreter','latex')
+        grid on;
+    end
+end
 %% Position estimation error
 axis_str = {'X_{i}','Y_{i}','Z_{i}'};
 i_axis = 0;
@@ -83,7 +67,7 @@ for i=simpar.states.ixfe.b_clock
     stairs(traj.time_nav, 3.*sqrt(squeeze(navCov(i,i,:))),'r--');
     stairs(traj.time_nav, -3.*sqrt(squeeze(navCov(i,i,:))),'r--'); hold off
     xlabel('Time(s)')
-    ystring = sprintf('%s Range Bias Err (rad)',axis_str{i_axis});
+    ystring = sprintf('%s Range Bias Err (rad/s)',axis_str{i_axis});
     ylabel(ystring)
     legend('estimated','true','3-sigma')
     grid on;
@@ -104,7 +88,7 @@ for i=simpar.states.ixfe.gbias
     grid on;
 end
 %% Height estimation error
-legend('X_{c}','Y_{c}','Z_{c}')
+legend('X_{b}','Y_{b}','Z_{b}')
 i_axis = 0;
 for i=simpar.states.ixfe.h_t
     i_axis = i_axis + 1;
@@ -113,7 +97,7 @@ for i=simpar.states.ixfe.h_t
     stairs(traj.time_nav, 3.*sqrt(squeeze(navCov(i,i,:))),'r--');
     stairs(traj.time_nav, -3.*sqrt(squeeze(navCov(i,i,:))),'r--'); hold off
     xlabel('Time(s)')
-    ystring = sprintf('%s Height Est Err (rad/s)',axis_str{i_axis});
+    ystring = sprintf('%s Terrain Height Est Err (rad/s)',axis_str{i_axis});
     ylabel(ystring)
     legend('estimated','true','3-sigma')
     grid on;

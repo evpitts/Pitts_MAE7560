@@ -36,7 +36,7 @@ hmoon = surf(X*R,Y*R,Z*R,'FaceAlpha',0.2,...
     'FaceColor','k','EdgeAlpha',0.3);
 legend([htraj, hstart, hstop, hmoon],...
     'trajectory','start','stop','moon','Interpreter','latex')
-%% Plot position
+%% Plot 2D position
 %Create a new figure at the end of the figure array
 h_figs(end+1) = figure;
 %Plot the truth state position over time. We only need to plot in two
@@ -46,7 +46,7 @@ h_figs(end+1) = figure;
 plot(traj.truthState(simpar.states.ix.pos(1),:)'*m2km, ...
     traj.truthState(simpar.states.ix.pos(2),:)'*m2km,'LineWidth',2);
 %Matlab supports a subset of Tex markup
-title('Positions')
+title('2D Positions')
 xlabel('$x_i\left(km\right)$','Interpreter','latex')
 ylabel('$y_i\left(km\right)$','Interpreter','latex')
 grid on;
@@ -101,12 +101,6 @@ grid on;
 % ylabel('$q^{lvlh}_{c}$','Interpreter','latex')
 % legend('q_0','q_i','q_j','q_k')
 % grid on;
-%% Plot camera angle of incidence
-% h_figs(end+1) = figure;
-% stairs(traj.time_nav, traj.angle_of_incidence_deg);
-% xlabel('time$\left(s\right)$','Interpreter','latex');
-% ylabel('$\gamma\left(deg\right)$','Interpreter','latex');
-% grid on;
 %% Loss residuals
 h_figs(end+1) = figure;
 stairs(traj.time_kalman,traj.navRes.loss');
@@ -133,4 +127,34 @@ ylabel('m/s');
 legend('x_i','y_i','z_i')
 grid on;
 %% Add the remaining estimation error plots
+%% Plot Range Bias Eroor
+h_figs(end+1) = figure;
+stairs(traj.time_nav, dele(simpar.states.ixfe.br,:)');
+title('Range Bias Error');
+xlabel('time(s)');
+ylabel('m');
+grid on;
+%% Plot Gravity Bias error
+h_figs(end+1) = figure;
+stairs(traj.time_nav, dele(simpar.states.ixfe.gbias,:)');
+title('Gravity Bias Error');
+xlabel('time(s)');
+ylabel('m/s^2');
+legend('x','y','z')
+grid on;
+%% Plot Terrain Height Error
+h_figs(end+1) = figure;
+stairs(traj.time_nav, dele(simpar.states.ixfe.h,:)');
+title('Terrain Height Error');
+xlabel('time(s)');
+ylabel('m');
+grid on;
+%% Plot Accleration Bias error
+h_figs(end+1) = figure;
+stairs(traj.time_nav, dele(simpar.states.ixfe.ba,:)');
+title('Accelerometer Bias Error');
+xlabel('time(s)');
+ylabel('mg');
+legend('x','y','z')
+grid on;
 end

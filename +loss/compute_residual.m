@@ -1,4 +1,4 @@
-function loss_res = compute_residual(xhat, loss_ztilde, r_f_i, simpar)
+function loss_res = compute_residual(xhat, loss_ztilde, r_f_i, simpar, Ti2b)
 %compute_residual_example calculates the measurement residual
 %
 % Inputs:
@@ -20,7 +20,7 @@ function loss_res = compute_residual(xhat, loss_ztilde, r_f_i, simpar)
 % Copyright 2020 Utah State University
 
 %Predict the measurement
-loss_ztildehat = loss.pred_measurement(xhat,r_f_i,simpar);
+loss_ztildehat = loss.pred_measurement(xhat,r_f_i,simpar, Ti2b);
 %Get the prediction error
 loss_res = loss_ztilde-loss_ztildehat;
 end

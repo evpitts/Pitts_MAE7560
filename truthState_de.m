@@ -38,7 +38,7 @@ accl_bias = x(simpar.states.ix.b_accl);
 
 %% Compute individual elements of x_dot
 r_dot = v;
-a_grav = -simpar.general.MU/norm(r)^3*r;
+a_grav = -simpar.general.mu/norm(r)^3*r;
 v_dot = a_grav + input.a_thrust + g_bias + input.w_a;
 
 q_im_dot = 1/2*qmult([0;omega_mi_m],att);
@@ -48,7 +48,7 @@ b_r_dot = -1/tau_r*range_bias + input.w_r;
 
 i_hat = r/norm(r);
 v_perp = v - cross(omega_mi_m,r) - dot(v, i_hat)*i_hat;
-gbias_dot = -norm(v_perp)/d_g*g_bias + input.w_d;
+gbias_dot = -norm(v_perp)/d_g*g_bias + input.w_g;
 
 h_dot = norm(v_perp)/d_h*height + input.w_h;
 

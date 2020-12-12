@@ -18,11 +18,11 @@ function xhatdot = navState_de(xhat,input)
 
 %% Unpack the inputs
 simpar = input.simpar;
+v_perp = input.v_perp;
 a_tilde = input.ytilde;
 % a_thrust = input.a_thrust;
 
-T_i2b = calc_attitude(xhat, simpar);
-T_b2i = T_i2b'; %Review why this is a transpose instead of an inverse
+T_b2i = input.Ti2b'; %Review why this is a transpose instead of an inverse
 omega_mi_m = [0;0;simpar.general.omega_moon];
 
 tau_r = simpar.general.tau_r;
@@ -40,17 +40,17 @@ accl_bias_hat = xhat(simpar.states.ixf.b_accl);
 
 %% Compute individual elements of x_dot
 rhat_dot = v_hat;
-a_grav = -simpar.general.MU/norm(r_hat)^3*r_hat;
+a_grav = -simpar.general.mu/norm(r_hat)^3*r_hat;
 vhat_dot = T_b2i*(a_tilde-accl_bias_hat)+a_grav+ghat_bias;
 
-bhat_r_dot = -1/tau_r*range_bias_hat;
+bhat_r_dot = -range_bias_hat/tau_r;
 
-i_hat = r_hat/norm(r_hat);
-v_perp_hat = v_hat-cross(omega_mi_m,r_hat)-dot(v_hat, i_hat)*i_hat;
+% i_hat = r_hat/norm(r_hat);
+% v_perp_hat = v_hat-cross(omega_mi_m,r_hat)-dot(v_hat, i_hat)*i_hat;
 
-ghat_bias_dot = -norm(v_perp_hat)/d_g*ghat_bias;
+ghat_bias_dot = -norm(v_perp)/d_g*ghat_bias;
 
-hhat_dot = -norm(v_perp_hat)/d_h*height_hat;
+hhat_dot = -norm(v_perp)/d_h*height_hat;
 
 bhat_ax_dot = -accl_bias_hat/tau_a;
 %% Assign to output

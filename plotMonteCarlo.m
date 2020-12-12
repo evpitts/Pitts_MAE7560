@@ -34,6 +34,15 @@ for i=1:n
     xlabel('time(s)')
     ylabel(ylabels{i},'Interpreter','latex')
 end
+
+% plot(xError, zError, 'r*');
+% hold on
+% plot(0,0, 'bo', 'MarkerSize', 12);
+% xlabel('x (m)')
+% ylabel('z (m)')
+% legend('MonteCarlo Runs', 'Target Landing Site')
+% axis 'equal'
+% title('Landing Site Errors')
 % %% Create estimation error plots in LVLH frame
 % nsamp = length(traj_ref.time_nav);
 % %Transform

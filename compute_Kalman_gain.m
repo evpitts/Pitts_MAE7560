@@ -1,4 +1,4 @@
-function [ output_args ] = compute_Kalman_gain( input_args )
+function [K] = compute_Kalman_gain(P,H,cov_res,EnableMeasurement)
 %compute_Kalman_gain calculates the Kalman gain
 %
 % Inputs:
@@ -18,4 +18,5 @@ function [ output_args ] = compute_Kalman_gain( input_args )
 % Date: 31-Aug-2020 16:01:57
 % Reference: 
 % Copyright 2020 Utah State University
+K = P*H'*inv(cov_res).*EnableMeasurement;
 end

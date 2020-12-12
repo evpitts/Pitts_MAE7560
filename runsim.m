@@ -19,7 +19,7 @@ simpar.general.q_b2c_nominal = qmult(qx,qmult(qy,qz));
 % Truth, navigation, and error state buffers
 x_buff          = zeros(simpar.states.nx,nstep);
 xhat_buff       = zeros(simpar.states.nxf,nstep);
-delx_buff       = zeros(simpar.states.nxfe,nstep);
+delx_buff       = zeros(simpar.states.nxfe,simpar.states.nxfe,nstep);
 % Navigation covariance buffer
 P_buff       = zeros(simpar.states.nxfe,simpar.states.nxfe,nstep);
 % Continuous measurement buffer
@@ -28,6 +28,8 @@ ytilde_buff     = zeros(simpar.general.n_inertialMeas,nstep);
 % res_example          = zeros(3,nstep_aid);
 % resCov_example       = zeros(3,3,nstep_aid);
 %K_example_buff       = zeros(simpar.states.nxfe,3,nstep_aid);
+loss_resCov = zeros(2,2,nstep_aid);
+K_buff = zeros(simpar.states.nxfe,2,nstep_aid);
 loss_res = zeros(2, nstep_aid);
 %% Initialize the navigation covariance matrix
 P_buff(:,:,1)   = initialize_covariance(simpar);
@@ -53,7 +55,7 @@ a_thr(:,1) = guidance(x_buff(simpar.states.ix.pos,1),...
                       a_grav, 'apollo');
 % Synthesize continuous sensor data at t_n-1
 wa_0 = sqrt(simpar.truth.params.Q_nongrav/simpar.general.dt)*randn(3,1);
-ytilde_buff(:,1) = contMeas(x_buff(:,1), a_thr(:,1), wa_0, simpar);
+%ytilde_buff(:,1) = contMeas(x_buff(:,1), a_thr(:,1), wa_0, simpar);
 %Initialize the measurement counter
 k = 1;
 %Check that the error injection, calculation, and removal are all
@@ -97,7 +99,7 @@ for i=2:nstep
     w_g = sqrt(Q_g/simpar.general.dt).*randn(3,1);
     
     %Noise in 
-    w_a = sqrt(simpar.truth.params.Q_nongrav/simpar.general.dt).*randn(3,1);
+    w_a = sqrt(simpar.truth.params.Q_nongrav/simpar.general.dt)*randn(3,1);
     w_r = sqrt(Q_rbias/simpar.general.dt)*randn;
     
     %Noise in 
@@ -108,7 +110,7 @@ for i=2:nstep
     %Noise values - accelerometer, range, something, height, acceleration
     input_truth.w_a = w_a;
     input_truth.w_r = w_r;
-    input_truth.w_d = w_g;
+    input_truth.w_g = w_g;
     input_truth.w_h = w_h;
     input_truth.w_accl = w_accl;
     input_truth.simpar = simpar;
@@ -117,27 +119,30 @@ for i=2:nstep
     x_buff(:,i) = rk4('truthState_de', x_buff(:,i-1), input_truth,...
         simpar.general.dt);
     % Synthesize continuous sensor data at t_n
-    ytilde_buff(:,i) = contMeas(x_buff(:,i), a_thr(:,i-1), w_a, simpar);
+    T_i2b = calc_attitude(x_buff(:,i-1), simpar);
+    ytilde_buff(:,i) = contMeas(x_buff(:,i), a_thr(:,i-1), w_a, simpar,T_i2b);
     % Propagate navigation states to t_n using sensor data from t_n-1
     %   Assign inputs to the navigation state DE
     %   Perform one step of RK4 integration
+    input_nav.Ti2b = T_i2b;
     input_nav.ytilde = ytilde_buff(:,i);
     input_nav.simpar = simpar;
-    input_nav.a_grav = a_grav;
+    input_nav.v_perp = v_perp;
     xhat_buff(:,i) = rk4('navState_de', xhat_buff(:,i-1), input_nav, ...
         simpar.general.dt);
     % Propagate the covariance to t_n
     input_cov.simpar = simpar;
     input_cov.ytilde = ytilde_buff(:,i);
-    input_cov.x = x_buff(:,i-1);
+    input_cov.Ti2b = T_i2b;
     input_cov.xhat = xhat_buff(:,i-1);
     input_cov.v_perp = v_perp;
     P_buff(:,:,i) = rk4('navCov_de', P_buff(:,:,i-1), input_cov, ...
         simpar.general.dt);
     % Propagate the error state from tn-1 to tn if errorPropTestEnable == 1
+    format long
     if simpar.general.errorPropTestEnable
         input_delx.xhat = xhat_buff(:,i-1);
-        input_delx.ytilde = [];
+        input_delx.Ti2b = T_i2b;
         input_delx.simpar = simpar;
         delx_buff(:,i) = rk4('errorState_de', delx_buff(:,i-1), ...
             input_delx, simpar.general.dt);
@@ -153,7 +158,7 @@ for i=2:nstep
         
         %Validate Linearization
         if simpar.general.measLinerizationCheckEnable
-            loss.validate_linearization(x_buff(:,i),simpar);
+            loss.validate_linearization(x_buff(:,i), simpar);
         end
         
         %Adjust the Kalman update index
@@ -169,25 +174,19 @@ for i=2:nstep
         %       Compute and save the Kalman gain, K
         %       Estimate the error state vector
         %       Update and save the covariance matrix
-        %       Correct and save the navigation states
-% % %         ztilde_example = example.synthesize_measurement();
-% % %         ztildehat_example = example.predict_measurement();
-% % %         H_example = example.compute_H();
-% % %         example.validate_linearization();
-% % %         res_example(:,k) = example.compute_residual();
-% % %         resCov_example(:,k) = compute_residual_cov();
-% % %         K_example_buff(:,:,k) = compute_Kalman_gain();
-% % %         del_x = estimate_error_state_vector();
-% % %         P_buff(:,:,k) = update_covariance();
-% % %         xhat_buff(:,i) = correctErrors();
-%       %The Kalman gain is set to zero for Linear Error Modeling
-%       K = 0
-        %Calculate H
-        %H = compute_H(x_buff(:,i), xhat_buff(:,i), simpar);
-        
+        %       Correct and save the navigationclose states
         %Synthesize the measurement
-        [loss_ztilde, r_f_i] = loss.synth_measurement(x_buff(:,i),simpar);
-        loss_res(:,k) = loss.compute_residual(xhat_buff(:,i), loss_ztilde, r_f_i, simpar);
+        [loss_ztilde, r_f_i] = loss.synth_measurement(x_buff(:,i),simpar, T_i2b);
+        loss_res(:,k) = loss.compute_residual(xhat_buff(:,i), loss_ztilde, r_f_i, simpar, T_i2b);
+        
+        H = loss.compute_H(x_buff(:,i), xhat_buff(:,i), simpar, T_i2b);
+        R = loss.compute_R(x_buff(:,i), H, simpar);
+        loss_resCov(:,:,k) = loss.compute_covariance_residual(H,P_buff(:,:,i),R);
+        K_buff(:,:,k) = compute_Kalman_gain(P_buff(:,:,i), H, loss_resCov(:,:,k), simpar.general.processLOSEnable);
+        K_buff(simpar.states.ixfe.b_accl,:,k) = K_buff(simpar.states.ixfe.b_accl,:,k);
+        delx_buff(:,i) = K_buff(:,:,k)*loss_res(:,k);
+        P_buff(:,:,i) = update_covariance(K_buff(:,:,k), H, P_buff(:,:,i), R, simpar);
+        xhat_buff(:,i) = correctErrors(xhat_buff(:,i),delx_buff(:,i),simpar);
     end
     
     %Recalculate a_thr by calling the guidance law again
@@ -209,8 +208,8 @@ end
 T_execution = toc;
 %Package up residuals
 navRes.loss = loss_res;
-navResCov.loss = 1;
-kalmanGains.loss = 1;
+navResCov.loss = loss_resCov;
+kalmanGains.loss = K_buff;
 %Package up outputs
 traj = struct('navState',xhat_buff,...
     'navCov',P_buff,...

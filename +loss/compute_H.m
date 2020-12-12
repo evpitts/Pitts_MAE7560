@@ -1,4 +1,4 @@
-function H = compute_H(x, xhat, simpar)
+function H = compute_H(x, xhat, simpar, Ti2b)
 %compute_H_example calculates the measurement sensitivity matrix
 %
 % Inputs:
@@ -26,30 +26,30 @@ function H = compute_H(x, xhat, simpar)
 %%relationship between h and x is implicit. Thus, del_z = (dh/dl *
 %%dl/dx)*del_x + nu
 %Get T_i_b and make it a quaternion
-T_i2b = calc_attitude(x, simpar);
-qi2b = tmat2q(T_i2b);
+%T_i2b = calc_attitude(x, simpar);
+qi2b = tmat2q(Ti2b);
 %Get the position from the truth state (just for r_f_i)
 r_b_i = x(simpar.states.ix.pos);
 %Get the radius of the moon
-R_moon = simpar.general.R_M;
+R_moon = simpar.general.r_moon;
 %Calculate r_f_i
-r_f_i = gen_landmark(r_b_i, zeros(3,1), qi2b, R_moon, 'center', ...
+[~,r_f_i,intersect,~] = gen_landmark(r_b_i, zeros(3,1), qi2b, R_moon, 'center', ...
                      simpar.general.q_b2c_nominal);
 
 %Get r_b_i from the nav state
-r_b_i_hat = xhat(simpar.states.ix.pos);
+r_b_i_hat = xhat(simpar.states.ixfe.pos);
 
 %Transform to a matrix
 T_b_c = q2tmat(simpar.general.q_b2c_nominal);
 
 %Calculate l_c
-l_c = T_b_c*T_i2b*(r_f_i - r_b_i_hat);
+l_c = T_b_c*Ti2b*(r_f_i - r_b_i_hat);
 
 %Get the partials
 dh_dl = [1/l_c(3) 0 -l_c(1)/l_c(3)^2;...
          0 1/l_c(3) -l_c(2)/(l_c(3)^2)];
 dl_dx = zeros(3,14);
-dl_dx(1:3,1:3) = -T_b_c*T_i2b;
+dl_dx(1:3,1:3) = -T_b_c*Ti2b*eye(3,3);
 
 %Calculate H
 H = dh_dl*dl_dx;
