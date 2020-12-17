@@ -38,6 +38,7 @@ x_buff(:,1) = initialize_truth_state(simpar);
 %% Initialize the navigation state vector
 xhat_buff(:,1) = initialize_nav_state(x_buff(:,1),simpar);
 %% Miscellaneous calcs
+%  xhat_buff(:,1)
 %Guidance law
 %[a] = guidance(r, v, af, vf, rf, tgo, g, varargin);
 %r_i_ref = [0, 0, simpar.general.R_M]';
@@ -118,6 +119,7 @@ for i=2:nstep
     %Perform one step of RK4 integration
     x_buff(:,i) = rk4('truthState_de', x_buff(:,i-1), input_truth,...
         simpar.general.dt);
+%     xhat_buff(:,1)
     % Synthesize continuous sensor data at t_n
     T_i2b = calc_attitude(x_buff(:,i-1), simpar);
     ytilde_buff(:,i) = contMeas(x_buff(:,i), a_thr(:,i-1), w_a, simpar,T_i2b);
@@ -130,6 +132,7 @@ for i=2:nstep
     input_nav.v_perp = v_perp;
     xhat_buff(:,i) = rk4('navState_de', xhat_buff(:,i-1), input_nav, ...
         simpar.general.dt);
+%      xhat_buff(:,i)
     % Propagate the covariance to t_n
     input_cov.simpar = simpar;
     input_cov.ytilde = ytilde_buff(:,i);
@@ -139,6 +142,7 @@ for i=2:nstep
     P_buff(:,:,i) = rk4('navCov_de', P_buff(:,:,i-1), input_cov, ...
         simpar.general.dt);
     % Propagate the error state from tn-1 to tn if errorPropTestEnable == 1
+%      P_buff(:,:,i)
     format long
     if simpar.general.errorPropTestEnable
         input_delx.xhat = xhat_buff(:,i-1);
@@ -158,7 +162,7 @@ for i=2:nstep
         
         %Validate Linearization
         if simpar.general.measLinerizationCheckEnable
-            loss.validate_linearization(x_buff(:,i), simpar);
+            loss.validate_linearization(x_buff(:,i), simpar, T_i2b);
         end
         
         %Adjust the Kalman update index
@@ -187,6 +191,9 @@ for i=2:nstep
         delx_buff(:,i) = K_buff(:,:,k)*loss_res(:,k);
         P_buff(:,:,i) = update_covariance(K_buff(:,:,k), H, P_buff(:,:,i), R, simpar);
         xhat_buff(:,i) = correctErrors(xhat_buff(:,i),delx_buff(:,i),simpar);
+         xhat_buff(:,i)
+         disp(i)
+%         save('EmilyWorkspace.mat')
     end
     
     %Recalculate a_thr by calling the guidance law again

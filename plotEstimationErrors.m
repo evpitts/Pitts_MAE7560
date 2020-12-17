@@ -12,15 +12,15 @@ navCov = traj.navCov;
 nav_errors = calcErrors( navState, traj.truthState, simpar );
 h_figs = [];
 %% Visual odometry residuals
-if simpar.general.processVisualOdometryEnable
+if simpar.general.processLOSEnable
     axis_str = {'$l_{x}/l_{z}$','$l_{y}/l_{z}$'};
     for i=1:2
         h_figs(end+1) = figure('Name',sprintf('res_LOS_%d',i)); %#ok<*AGROW>
-        stairs(traj.time_kalman,traj.navRes.los(i,:)'); hold on
+        stairs(traj.time_kalman,traj.navRes.loss(i,:)'); hold on
         stairs(traj.time_kalman,...
-            3.*sqrt(squeeze(traj.navResCov.los(i,i,:))),'r--');
+            3.*sqrt(squeeze(traj.navResCov.loss(i,i,:))),'r--');
         stairs(traj.time_kalman,...
-            -3.*sqrt(squeeze(traj.navResCov.los(i,i,:))),'r--');
+            -3.*sqrt(squeeze(traj.navResCov.loss(i,i,:))),'r--');
         xlabel('time$\left(s\right)$','Interpreter','latex');
         ystring = sprintf('%s LOS Residual',axis_str{i});
         ylabel(ystring,'Interpreter','latex')

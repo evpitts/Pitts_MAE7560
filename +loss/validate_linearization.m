@@ -1,4 +1,4 @@
-function [] = validate_linearization(x, simpar)
+function [] = validate_linearization(x, simpar, Ti2b)
 %validate_linearization_example validates the calculation of the
 %measurement sensitivity matrix
 %
@@ -28,9 +28,9 @@ for j=1:length(fnames)
 end
 xhat = injectErrors(truth2nav(x), dele_injected, simpar);
 %% Calculate residual
-[z_tilde,r_f_i] = loss.synth_measurement(x, simpar);
-delz_nl = loss.compute_residual(xhat, z_tilde, r_f_i, simpar);
-H = loss.compute_H(x, xhat, simpar);
+[z_tilde,r_f_i] = loss.synth_measurement(x, simpar, Ti2b);
+delz_nl = loss.compute_residual(xhat, z_tilde, r_f_i, simpar, Ti2b);
+H = loss.compute_H(x, xhat, simpar, Ti2b);
 delz_l = H*dele_injected;
 %% Compare linear and nonlinear residuals
 measLinTable.delz_nl = delz_nl;
